@@ -2,6 +2,9 @@ const express = require("express");
 const dotenv = require("dotenv");
 
 const userRoute = require("./Routes/userRoutes");
+const restaurantRoutes = require("./Routes/restaurantRoutes");
+const menuRoutes = require("./Routes/menuRoutes");
+
 const app = express();
 
 app.use(express.json());
@@ -10,6 +13,8 @@ dotenv.config({ path: "./.env" });
 require("./server");
 
 app.use("/user", userRoute);
+app.use("/restaurant", restaurantRoutes);
+app.use("/menu", menuRoutes);
 
 let port = 8000;
 

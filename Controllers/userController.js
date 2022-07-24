@@ -1,5 +1,6 @@
 const User = require("../Models/userModel");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
 exports.signUp = async (req, res) => {
   try {
@@ -14,6 +15,7 @@ exports.signUp = async (req, res) => {
       return res.status(400).json({ message: "passwords dont match" });
     }
     //3. password > 7
+
     if (req.body.password.length < 7) {
       return res
         .status(400)
@@ -44,8 +46,18 @@ exports.login = async (req, res) => {
     if (checkPassword === false) {
       return res.status(400).json({ message: "Wrong Email or Password" });
     }
+
+    //token
+    const token = await jwt.sign(
+      {
+        expiresAt: "1h",
+        data: { id: user._id, email: user.email, role: user.role },
+      },
+      process.env.JWTSECRET
+    );
+
     //3. login
-    res.status(200).json({ message: "Loged in" });
+    res.status(200).json({ message: "Loged in", token: token });
   } catch (e) {
     res.status(500).json({ message: "Error" });
   }
@@ -55,7 +67,7 @@ exports.login = async (req, res) => {
 exports.changePassword = async (req, res) => {
   try {
     //1. Check email exists
-    const user = await User.findOne({ email: req.body.email });
+    const user = await User.findOne({ email: req.user.email });
     if (!user) {
       return res.status(400).json({ message: "User does not exist" });
     }
@@ -83,11 +95,32 @@ exports.changePassword = async (req, res) => {
     //6. Update database
     const hashedPassword = await bcrypt.hash(req.body.newPassword, 10);
     await User.findOneAndUpdate(
-      { email: req.body.email },
+      { email: user.email },
       { password: hashedPassword }
     );
     res.status(200).json({ message: "password changed" });
   } catch (e) {
     res.status(500).json({ message: "Error" });
+  }
+};
+
+exports.protect = (req, res, next) => {
+  try {
+    const token = req.headers.authorization;
+    //if there is a token
+    if (!token) {
+      return res.status(401).json({ message: "You are not logged in" });
+    }
+    //if token is valid
+    jwt.verify(token, process.env.JWTSECRET, function (err, decoded) {
+      if (err) {
+        return res.status(400).json({ message: "Session expired" });
+      }
+
+      req.user = decoded.data;
+    });
+    next();
+  } catch (e) {
+    console.log(e);
   }
 };

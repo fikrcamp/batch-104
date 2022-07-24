@@ -23,10 +23,14 @@ exports.getOne = async (req, res) => {
 
 exports.create = async (req, res) => {
   try {
-    const found = await Restaurant.findOne({ user: req.body.user });
-    if (found) {
-      return res.status(400).json({ message: "you already have a restaurant" });
-    }
+    req.body.image = req.file.filename;
+    req.body.user = req.user.id;
+    req.body.cusine = req.body.cusine.split(",");
+
+    // const found = await Restaurant.findOne({ user: req.body.user });
+    // if (found) {
+    //   return res.status(400).json({ message: "you already have a restaurant" });
+    // }
     await Restaurant.create(req.body);
     res.status(200).json({ message: "Created Restaurant" });
   } catch (e) {

@@ -9,6 +9,7 @@ const menuRoutes = require("./Routes/menuRoutes");
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use(express.static("Images"));
 
 dotenv.config({ path: "./.env" });
 require("./server");

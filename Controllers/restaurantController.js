@@ -23,6 +23,16 @@ exports.getOne = async (req, res) => {
   }
 };
 
+exports.getUsersRestaurant = async (req, res) => {
+  try {
+    let restaurant = await Restaurant.findOne({ user: req.user.id });
+
+    res.status(200).json({ restaurant: restaurant });
+  } catch (e) {
+    res.status(400).json({ message: "error" });
+  }
+};
+
 exports.create = async (req, res) => {
   try {
     console.log(req.body);

@@ -23,6 +23,15 @@ exports.get = async (req, res) => {
   }
 };
 
+exports.getOne = async (req, res) => {
+  try {
+    const menu = await Menu.findById(req.params.id);
+    res.status(200).json({ message: "found", menu });
+  } catch (e) {
+    res.status(404).json({ message: "Error" });
+  }
+};
+
 exports.edit = async (req, res) => {
   try {
     await Menu.findByIdAndUpdate(req.params.id, req.body);
